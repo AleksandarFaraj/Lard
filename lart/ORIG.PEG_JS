@@ -1,0 +1,97 @@
+/*
+ * Classic example grammar, which recognizes simple arithmetic expressions like
+ * "2*(3+4)". The parser generated from this grammar then computes their value.
+ */
+          
+        start =  COMMANDS+
+
+
+        COMMANDS = SEP* command: COMMAND ";" SEP* { return command }
+        COMMAND =
+        DATATYPE /
+        ASSIGNMENT /    
+        MATH /
+        EXPRESSION_EXP /
+        
+
+
+
+        DATATYPE =
+        name:STRING_EXP
+           SEP+
+        arguments: ARGUMENTS
+        {
+          var keywords=["names","int","double","string"]
+          for (var i=0; i < keywords.length; i++) {
+            var keyword = keywords[i];
+            if(name.toLowerCase()=="tell_me") {
+                return [name.toUpperCase(),arguments];
+            } else if (name.toLowerCase()==keyword) {
+              return ["DATATYPE",name,arguments];
+            }
+          }
+          throw new Error(name+" is not a keyword.");
+        }
+
+
+
+        ASSIGNMENT =
+        key:MEMORY_LOCATION_EXP SEP* "<-" SEP* value:(MATH)
+        { return ["ASSIGN",key,value]} 
+
+
+NAMES = names: "names"i SEP+ arguments: ARGUMENTS { return [names,arguments] }
+INT = int: "int"i SEP+ ARGUMENTS
+
+ARGUMENTS = args:ARGUMENT+ { return args; };
+ARGUMENT = 
+ COMMA SEP* argument : ARGUMENT SEP* { return argument; } 
+     / 
+ string_exp: MATH { return string_exp;} 
+
+COMMA = [,]
+
+SEP
+  = [ \t\r\n] 
+
+MEMORY_LOCATION_EXP =
+   char: [a-zA-Z_] chars:[0-9a-zA-Z_]* { 
+      return ["MEMORYLOCATION",char+chars.join("").trim()];
+   }
+
+MATH=SEP* m:(DIVISION/MULTIPLY/MODULUS/ADDITION/SUBTRACT/EXPRESSION_EXP) {return m;}
+
+ADDITION=left:EXPRESSION_EXP "+" right:MATH { return ["ADDITION",left,right]}
+SUBTRACT= left:EXPRESSION_EXP "-" right:MATH { return ["SUBTRACTION",left,right]}
+DIVISION=left:EXPRESSION_EXP "/" right:MATH { return ["DIVISION",left,right]}
+MULTIPLY=left:EXPRESSION_EXP "*" right:MATH { return ["MULTIPLY",left,right]}
+MODULUS=left:EXPRESSION_EXP "%" right:MATH { return ["MODULUS",left,right]}
+
+STRING_EXP =
+   chars:[0-9a-zA-Z_]+ { return chars.join("").trim(); }
+
+SPACEABLE_STRING_EXP = 
+    left:SEP* middle:STRING_EXP right:SEP* { 
+     return left.join("")
+     +
+   middle
+    +
+   right.join("")
+   };
+
+
+QUOTE_STRING = "\"" val:SPACEABLE_STRING_EXP* "\"" {return ["STRING",val.join("")]}
+EXPRESSION_EXP = 
+    SEP* "(" SEP* math:MATH SEP* ")" {return math}
+           /
+    SEP* constant:CONSTANT SEP* { return constant;} 
+           / 
+    SEP* memory_location_exp:MEMORY_LOCATION_EXP SEP* { return memory_location_exp;} 
+           / 
+    SEP* val:QUOTE_STRING SEP* {return val;}
+           /
+    SEP* string_exp:STRING_EXP SEP* { return string_exp;} 
+
+CONSTANT = float: FLOAT_NUMBER { return ["DOUBLE",float]} / number: NUMBER { return ["INTEGER",number]}
+FLOAT_NUMBER = left:[0-9]+ "." right:[0-9]+ { return parseFloat(left.join("")+"."+right.join("")); }
+NUMBER = number:[0-9]+ { return parseInt(number.join("")); }

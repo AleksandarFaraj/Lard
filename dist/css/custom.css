@@ -1,0 +1,10 @@
+body {
+    padding-top: 70px;
+}
+
+textarea {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    height: 300px;
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>LARD71</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="dist/css/custom.css" rel="stylesheet">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Custom css -->
+    <link href="lart/lard.css" rel="stylesheet">
+
+    <script src="dist/js/angular.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">LARD71</a>
+        </div>
+    </div>
+</div>
+<!-- End of menu -->
+<div ng-app="LARD">
+    <div class="container" ng-controller="LardController as lard">
+        <div class="col-md-4">
+            <h3>
+                Datorminnet
+            </h3>
+            <table class="table table-hover table-bordered" ng-controller="MemoryController as memory">
+                <thead>
+                <tr>
+                    <th>
+                    </th>
+                    <th ng-repeat="data in memory.data.data.A track by $index"><!-- first element A -->
+                        {{$index}}
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(key, data) in memory.data.data track by $index">
+                    <th>
+                        {{key}}
+                    </th>
+                    <td ng-repeat="value in data track by $index">
+                        {{value.valueOf()}}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <h3>
+                Körningslogg!
+            </h3>
+            Här skriver datorn ut allt den tänker på medans den kör din kod.
+            <div class="well"><p ng-repeat="line in lard.console">{{line.valueOf()}}</p></div>
+        </div>
+        <div class="col-md-3">
+            <div ng-hide="lard.instructionViews==null">
+                <h3>
+                    Programmet körs
+                </h3>
+
+                <div class="well">
+                    <ul>
+                        <li ng-repeat="instruction in lard.instructionViews">
+                            <span class="glyphicon" ng-class="instruction.state"></span>{{instruction.data.valueOf()}}
+                        </li>
+                    </ul>
+                </div>
+                <div ng-hide="lard.runningInstruction==null">
+                    <h3>
+                        Instruktion läses just nu
+                    </h3>
+
+                    <div class="well">{{lard.runningInstruction}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <h3>Program koden</h3>
+            Skriv en instruktion per rad och avsluta den med ett semikolon(;) annars förstår LARD71 inte dig.
+            <textarea ng-model="lard.programmingCode"></textarea>
+            <button class="button" ng-hide="lard.runningInstruction || lard.error" ng-click="lard.run()">Kör!</button>
+            <button class="button" ng-show="lard.error" ng-click="lard.run()">Kör!</button>
+            <button class="button" ng-show="lard.runningInstruction && lard.stepping && !lard.error && lard.runLater" ng-click=" lard.resume();lard.step();">Återupta</button>
+            <button class="button" ng-show="lard.runningInstruction && !lard.stepping && !lard.error" ng-click="lard.startStepping();">Stanna</button>
+            <button class="button" ng-show="!lard.runningInstruction && !lard.error" ng-click="lard.run(); lard.startStepping();">Hoppa ett steg</button>
+            <button class="button" ng-show="lard.runningInstruction && lard.error" ng-click="lard.run(); lard.startStepping();">Hoppa ett steg</button>
+            <button class="button" ng-show="lard.runningInstruction && !lard.error && lard.stepping && lard.runLater" ng-click="lard.step()">Hoppa ett steg</button>
+
+        </div>
+    </div>
+</div>
+
+<script src="dist/js/jquery.js"></script>
+<script src="dist/js/bootstrap.min.js"></script>
+<script src="dist/js/peg-0.8.0.min.js"></script>
+<script src="lart/lard.js"></script>
+<script src="lart/interpreter.js"></script>
+</body>
+</html>
